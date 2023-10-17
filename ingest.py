@@ -1,11 +1,11 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Chroma
+from langchain.vectorstores import FAISS
 
 
 DATA_PATH = "data/"
-DB_FAISS_PATH = "vectorstores/db_chroma"
+DB_FAISS_PATH = "vectorstores/db_faiss"
 
 # Create vector database
 def create_vector_db():
@@ -16,7 +16,7 @@ def create_vector_db():
 
     embeddings = HuggingFaceEmbeddings(model_name = 'sentence-transformers/all-MiniLM-L6-v2' , model_kwargs = {'device' : 'cpu'})
 
-    db = Chroma.from_documents(texts , embeddings)
+    db = FAISS.from_documents(texts , embeddings)
     db.save_local(DB_FAISS_PATH)
 
 

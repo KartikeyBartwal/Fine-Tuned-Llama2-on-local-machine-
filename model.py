@@ -9,10 +9,13 @@ os.environ["REPLICATE_API_TOKEN"] = "r8_1tXV1Jxf2JBIiunu0PrGCEuYgOabv251OjQ0x"
 
 from langchain.llms import Replicate
 from langchain import PromptTemplate, LLMChain
+from langchain.chains.conversation.memory import ConversationSummaryMemory 
 
 
+# Get the data which the LLM will refer to for answering user's questions
 DB_FAISS_PATH = "vectorstores/db_faiss"
 
+# Custom prompt template for a healthy user experience
 custom_prompt_template = ''' Use the following pieces of information to answer the user's question. 
 
 Context: {context}
@@ -20,6 +23,7 @@ Question: {question}
 
 Only return the helpful answer below and nothing else
 '''
+
 
 
 def set_custom_prompt():
@@ -35,7 +39,7 @@ def load_llm():
     llm = Replicate(
         model="a16z-infra/llama13b-v2-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5",
     input={"temperature": 0.75,
-           "max_length": 500,
+           "max_length": 32768,
            "top_p": 1},
         )
     return llm
@@ -46,7 +50,7 @@ def retrieval_qa_chain(llm , prompt , db):
         chain_type = "stuff" ,
         retriever = db.as_retriever(search_kwargs = {'k' : 2}),
         return_source_documents = True , 
-        chain_type_kwargs = {'prompt' : prompt}
+        chain_type_kwargs = {'prompt' : prompt},
     )
 
     return qa_chain
@@ -76,7 +80,7 @@ async def start():
     chain = qa_bot()
     msg = cl.Message(content = "Starting your AI...")
     await msg.send()
-    msg.content = "Hi, I am an Oliver Twist nerd. You can ask me all the stuffs related to the novel "
+    msg.content = "Hi cutie! You can ask me all the stuffs related to the documents you provided :)"
     await msg.update()
     cl.user_session.set("chain" , chain)
 
